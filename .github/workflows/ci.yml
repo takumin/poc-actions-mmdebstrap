@@ -31,7 +31,7 @@ jobs:
         aqua_opts: -a
     - name: Setup matrix
       id: matrix
-      run: echo targets="$(task matrix)" >> "$GITHUB_OUTPUT"
+      run: echo "targets='$(task matrix)'" >> "$GITHUB_OUTPUT"
   ################################################################################
   # Build
   ################################################################################
