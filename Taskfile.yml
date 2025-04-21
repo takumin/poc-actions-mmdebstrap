@@ -95,6 +95,7 @@ tasks:
     vars:
       PLATFORM: '{{env "PLATFORM" | default .PLATFORM}}'
       SUITE: '{{env "SUITE" | default .SUITE}}'
+      PROFILE: '{{env "PROFILE" | default .PROFILE}}'
       ARCHITECTURE: '{{env "ARCHITECTURE" | default .ARCHITECTURE}}'
       COMPONENTS: '{{env "COMPONENTS" | default .COMPONENTS}}'
       MIRROR: '{{env "MIRROR" | default .MIRROR}}'
@@ -103,6 +104,8 @@ tasks:
       msg: empty variable for '.PLATFORM'
     - sh: test -n "{{.SUITE}}"
       msg: empty variable for '.SUITE'
+    - sh: test -n "{{.PROFILE}}"
+      msg: empty variable for '.PROFILE'
     - sh: test -n "{{.ARCHITECTURE}}"
       msg: empty variable for '.ARCHITECTURE'
     - sh: test -n "{{.COMPONENTS}}"
@@ -124,5 +127,5 @@ tasks:
         --include 'init,systemd-resolved,systemd-timesyncd,systemd-oomd'
         --include 'libnss-myhostname,libnss-resolve,libnss-systemd,libpam-systemd'
         '{{.SUITE}}'
-        '{{.PLATFORM}}-{{.SUITE}}-{{.ARCHITECTURE}}-rootfs.tar.zst'
+        '{{.PLATFORM}}-{{.SUITE}}-{{.PROFILE}}-{{.ARCHITECTURE}}-rootfs.tar.zst'
         '{{.MIRROR}}'
