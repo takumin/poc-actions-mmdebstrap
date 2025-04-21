@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ toJson(needs.matrix.outputs.targets) }}
+        include: ${{ fromJson(needs.matrix.outputs.targets) }}
     runs-on: ${{ matrix.runner }}
     name: ${{ matrix.target }}
     env:
