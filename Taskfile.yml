@@ -1,0 +1,116 @@
+---
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  DEBIAN_COMPONENTS: main,contrib,non-free,non-free-firmware
+  UBUNTU_COMPONENTS: main,restricted,universe,multiverse
+
+  DEBIAN_MIRROR: http://deb.debian.org/debian
+  DEBIAN_SECURITY_MIRROR: http://security.debian.org/debian-security
+  UBUNTU_MIRROR: http://archive.ubuntu.com/ubuntu
+  UBUNTU_PORTS_MIRROR: http://ports.ubuntu.com/ubuntu-ports
+
+tasks:
+  default:
+    silent: true
+    desc: show github actions build matrix
+    cmds:
+    - task: matrix
+
+  debian:bookworm:server:amd64:
+    silent: true
+    desc: '{{.TASK}}'
+    cmds:
+    - task: build
+      vars:
+        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
+        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
+        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
+        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        COMPONENTS: '{{.DEBIAN_COMPONENTS}}'
+        MIRROR: '{{env "DEBIAN_MIRROR" | default .DEBIAN_MIRROR}}'
+
+  debian:bookworm:server:arm64:
+    silent: true
+    desc: '{{.TASK}}'
+    cmds:
+    - task: build
+      vars:
+        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
+        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
+        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
+        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        COMPONENTS: '{{.DEBIAN_COMPONENTS}}'
+        MIRROR: '{{env "DEBIAN_MIRROR" | default .DEBIAN_MIRROR}}'
+
+  ubuntu:noble:server:amd64:
+    silent: true
+    desc: '{{.TASK}}'
+    cmds:
+    - task: build
+      vars:
+        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
+        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
+        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
+        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        COMPONENTS: '{{.UBUNTU_COMPONENTS}}'
+        MIRROR: '{{env "UBUNTU_MIRROR" | default .UBUNTU_MIRROR}}'
+
+  ubuntu:noble:server:arm64:
+    silent: true
+    desc: '{{.TASK}}'
+    cmds:
+    - task: build
+      vars:
+        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
+        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
+        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
+        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        COMPONENTS: '{{.UBUNTU_COMPONENTS}}'
+        MIRROR: '{{env "UBUNTU_PORTS_MIRROR" | default .UBUNTU_PORTS_MIRROR}}'
+
+  matrix:
+    silent: true
+    internal: true
+    cmds:
+    - task -l -s | grep -v default | jq -R '.' | jq -cM --slurp
+
+  build:
+    internal: true
+    vars:
+      PLATFORM: '{{env "PLATFORM" | default .PLATFORM}}'
+      SUITE: '{{env "SUITE" | default .SUITE}}'
+      ARCHITECTURE: '{{env "ARCHITECTURE" | default .ARCHITECTURE}}'
+      COMPONENTS: '{{env "COMPONENTS" | default .COMPONENTS}}'
+      MIRROR: '{{env "MIRROR" | default .MIRROR}}'
+    preconditions:
+    - sh: test -n "{{.PLATFORM}}"
+      msg: empty variable for '.PLATFORM'
+    - sh: test -n "{{.SUITE}}"
+      msg: empty variable for '.SUITE'
+    - sh: test -n "{{.ARCHITECTURE}}"
+      msg: empty variable for '.ARCHITECTURE'
+    - sh: test -n "{{.COMPONENTS}}"
+      msg: empty variable for '.COMPONENTS'
+    - sh: test -n "{{.MIRROR}}"
+      msg: empty variable for '.MIRROR'
+    cmds:
+    - cmd: >-
+        mmdebstrap
+        --variant apt
+        --components '{{.COMPONENTS}}'
+        --dpkgopt 'path-exclude=/usr/share/man/*'
+        --dpkgopt 'path-include=/usr/share/man/man[1-9]/*'
+        --dpkgopt 'path-exclude=/usr/share/locale/*'
+        --dpkgopt 'path-include=/usr/share/locale/locale.alias'
+        --dpkgopt 'path-exclude=/usr/share/doc/*'
+        --dpkgopt 'path-include=/usr/share/doc/*/copyright'
+        --dpkgopt 'path-include=/usr/share/doc/*/changelog.Debian.*'
+        --include 'init,systemd-resolved,systemd-timesyncd,systemd-oomd'
+        --include 'libnss-myhostname,libnss-resolve,libnss-systemd,libpam-systemd'
+        '{{.SUITE}}'
+        '{{.PLATFORM}}-{{.SUITE}}-{{.ARCHITECTURE}}-rootfs.tar.zst'
+        '{{.MIRROR}}'
