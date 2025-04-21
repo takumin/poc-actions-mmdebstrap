@@ -45,6 +45,7 @@ jobs:
     runs-on: ${{ matrix.builder }}
     name: ${{ matrix.platform }}:${{ matrix.suite }}:${{ matrix.architecture }}
     steps:
+    - run: cat /etc/apt/sources.list
     - run: sudo apt-get update
     - run: >-
         sudo apt-get install -y --no-install-recommends
