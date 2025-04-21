@@ -22,7 +22,7 @@ jobs:
           architecture: amd64
           platform: ubuntu
           suite: noble
-          mirror: http://azure.archive.ubuntu.com/ubuntu
+          mirror: https://mirror.pilotfiber.com/ubuntu
           components: main restricted universe multiverse
         - builder: ubuntu-24.04-arm
           architecture: arm64
