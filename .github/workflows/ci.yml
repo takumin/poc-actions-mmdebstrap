@@ -34,7 +34,9 @@ jobs:
       id: matrix
       run: echo targets="$(task matrix)" >> "$GITHUB_OUTPUT"
     - name: Check matrix
-      run: echo '${{ steps.matrix.outputs.targets }}' | jq
+      run: echo "${TARGETS}" | jq
+      env:
+        TARGETS: ${{ fromJson(steps.matrix.outputs.targets) }}
   ################################################################################
   # Build
   ################################################################################
