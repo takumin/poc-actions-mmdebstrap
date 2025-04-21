@@ -22,25 +22,25 @@ jobs:
           architecture: amd64
           platform: ubuntu
           suite: noble
-          mirror: https://ftp.udx.icscoe.jp/Linux/ubuntu/
+          mirror: https://ftp.udx.icscoe.jp/Linux/ubuntu
           components: main restricted universe multiverse
         - builder: ubuntu-24.04-arm
           architecture: arm64
           platform: ubuntu
           suite: noble
-          mirror: https://ftp.udx.icscoe.jp/Linux/ubuntu-ports/
+          mirror: https://ftp.udx.icscoe.jp/Linux/ubuntu-ports
           components: main restricted universe multiverse
         - builder: ubuntu-24.04
           architecture: amd64
           platform: debian
           suite: bookworm
-          mirror: https://ftp.udx.icscoe.jp/Linux/debian/
+          mirror: https://ftp.udx.icscoe.jp/Linux/debian
           components: main contrib non-free non-free-firmware
         - builder: ubuntu-24.04-arm
           architecture: arm64
           platform: debian
           suite: bookworm
-          mirror: https://ftp.udx.icscoe.jp/Linux/debian/
+          mirror: https://ftp.udx.icscoe.jp/Linux/debian
           components: main contrib non-free non-free-firmware
     runs-on: ${{ matrix.builder }}
     name: ${{ matrix.platform }}:${{ matrix.suite }}:${{ matrix.architecture }}
