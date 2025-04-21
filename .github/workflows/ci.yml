@@ -40,4 +40,4 @@ jobs:
     - run: >-
         mmdebstrap
         ${{ matrix.suite }}
-        ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zstd
+        ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
