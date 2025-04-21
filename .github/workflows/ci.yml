@@ -8,6 +8,9 @@ on:
     - 'v*'
   pull_request:
 permissions: {}
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   mmdebstrap:
     timeout-minutes: 5
