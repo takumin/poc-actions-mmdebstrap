@@ -32,6 +32,8 @@ jobs:
     - name: Setup matrix
       id: matrix
       run: echo "targets='$(task matrix)'" >> "$GITHUB_OUTPUT"
+    - name: Check matrix
+      run: echo '${{ steps.matrix.outputs.targets }}'
   ################################################################################
   # Build
   ################################################################################
