@@ -51,6 +51,7 @@ jobs:
     - run: >-
         sudo apt-get install -y --no-install-recommends
         mmdebstrap debian-archive-keyring
+    - run: sudo mount -t tmpfs tmpfs /tmp
     - run: >-
         mmdebstrap
         --variant apt
