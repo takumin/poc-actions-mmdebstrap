@@ -53,6 +53,15 @@ jobs:
         mmdebstrap
         --variant apt
         --components "${{ matrix.components }}"
+        --dpkgopt 'path-exclude=/usr/share/man/*'
+        --dpkgopt 'path-include=/usr/share/man/man[1-9]/*'
+        --dpkgopt 'path-exclude=/usr/share/locale/*'
+        --dpkgopt 'path-include=/usr/share/locale/locale.alias'
+        --dpkgopt 'path-exclude=/usr/share/doc/*'
+        --dpkgopt 'path-include=/usr/share/doc/*/copyright'
+        --dpkgopt 'path-include=/usr/share/doc/*/changelog.Debian.*'
+        --include 'init,systemd-resolved,systemd-timesyncd,systemd-oomd'
+        --include 'libnss-myhostname,libnss-resolve,libnss-systemd,libpam-systemd'
         ${{ matrix.suite }}
         ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
         ${{ matrix.mirror }}
