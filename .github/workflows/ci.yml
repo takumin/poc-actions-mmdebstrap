@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ matrix.builder }}
     name: ${{ matrix.platform }}:${{ matrix.suite }}:${{ matrix.architecture }}
     steps:
-    - run: sudo sed -i -E 's@http://azure.archive.ubuntu.com/ubuntu@https://mirror.enzu.com/ubuntu@' /etc/apt/sources.list.d/ubuntu.sources
+    - run: sudo sed -i -E 's@http://azure.archive.ubuntu.com/ubuntu@https://mirror.pilotfiber.com/ubuntu@' /etc/apt/sources.list.d/ubuntu.sources
     - run: sudo sed -i -E 's@http://ports.ubuntu.com/ubuntu-ports@https://mirrors.ocf.berkeley.edu/ubuntu-ports@' /etc/apt/sources.list.d/ubuntu.sources
     - run: cat /etc/apt/sources.list.d/ubuntu.sources
     - run: sudo apt-get update
