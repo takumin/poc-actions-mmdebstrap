@@ -81,10 +81,11 @@ jobs:
         mmdebstrap debian-archive-keyring
     - run: sudo mount -t tmpfs tmpfs /tmp
     - run: task ${{ matrix.target }}
+    - run: echo 'filename=${{ matrix.target }}' | sed -E 's@:@-@g' >> "$GITHUB_ENV"
     - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
       with:
-        subject-path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
+        subject-path: ${{ env.filename }}-rootfs.tar.zst
     - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}
-        path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
+        name: ${{ env.filename }}
+        path: ${{ env.filename }}-rootfs.tar.zst
