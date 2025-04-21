@@ -74,6 +74,9 @@ jobs:
         ${{ matrix.suite }}
         ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
         ${{ matrix.mirror }}
+    - uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}
