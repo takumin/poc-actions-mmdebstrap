@@ -20,6 +20,11 @@ tasks:
     - task: lint
     - task matrix | jq
 
+  matrix:
+    silent: true
+    cmds:
+    - echo '{{toJson .MATRIX}}'
+
   format:
     desc: format files
     cmds:
@@ -84,11 +89,6 @@ tasks:
         ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
         COMPONENTS: main,restricted,universe,multiverse
         MIRROR: '{{env "UBUNTU_PORTS_MIRROR" | default "http://ports.ubuntu.com/ubuntu-ports"}}'
-
-  matrix:
-    silent: true
-    cmds:
-    - echo '{{toJson .MATRIX}}' | jq '.' | jq -cM --slurp
 
   build:
     internal: true
