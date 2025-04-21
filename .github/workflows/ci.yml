@@ -1,0 +1,43 @@
+---
+name: CI
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - 'v*'
+  pull_request:
+permissions: {}
+jobs:
+  mmdebstrap:
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - builder: ubuntu-24.04
+          architecture: amd64
+          platform: ubuntu
+          suite: noble
+        - builder: ubuntu-24.04
+          architecture: amd64
+          platform: debian
+          suite: bookworm
+        - builder: ubuntu-24.04-arm
+          architecture: arm64
+          platform: ubuntu
+          suite: noble
+        - builder: ubuntu-24.04-arm
+          architecture: arm64
+          platform: debian
+          suite: bookworm
+    runs-on: ${{ matrix.builder }}
+    steps:
+    - run: sudo apt-get update
+    - run: >-
+        sudo apt-get install -y --no-install-recommends
+        mmdebstrap debian-archive-keyring
+    - run: >-
+        mmdebstrap
+        ${{ matrix.suite }}
+        ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zstd
