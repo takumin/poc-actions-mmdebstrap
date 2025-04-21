@@ -48,6 +48,7 @@ jobs:
     - run: sudo sed -i -E 's@http://azure.archive.ubuntu.com/ubuntu@https://mirror.pilotfiber.com/ubuntu@' /etc/apt/sources.list.d/ubuntu.sources
     - run: sudo sed -i -E 's@http://ports.ubuntu.com/ubuntu-ports@https://mirrors.mit.edu/ubuntu-ports@' /etc/apt/sources.list.d/ubuntu.sources
     - run: cat /etc/apt/sources.list.d/ubuntu.sources
+    - run: sudo mount -t tmpfs tmpfs /var/lib/apt/lists
     - run: sudo apt-get update
     - run: >-
         sudo apt-get install -y --no-install-recommends
