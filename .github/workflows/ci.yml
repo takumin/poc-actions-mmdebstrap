@@ -74,3 +74,7 @@ jobs:
         ${{ matrix.suite }}
         ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
         ${{ matrix.mirror }}
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}
+        path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
