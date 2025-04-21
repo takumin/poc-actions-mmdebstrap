@@ -12,7 +12,31 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  mmdebstrap:
+  ################################################################################
+  # Matrix
+  ################################################################################
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      targets: ${{ steps.matrix.outputs.targets }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        persist-credentials: false
+    - uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
+      with:
+        aqua_version: v2.43.1
+        aqua_opts: -a
+    - name: Setup matrix
+      id: matrix
+      run: echo targets="$(task matrix)" >> "$GITHUB_OUTPUT"
+  ################################################################################
+  # Build
+  ################################################################################
+  build:
+    needs: [matrix]
     timeout-minutes: 5
     permissions:
       contents: read
@@ -21,40 +45,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-        - builder: ubuntu-24.04
-          architecture: amd64
-          platform: ubuntu
-          suite: noble
-          mirror: https://mirror.pilotfiber.com/ubuntu
-          components: main restricted universe multiverse
-        - builder: ubuntu-24.04-arm
-          architecture: arm64
-          platform: ubuntu
-          suite: noble
-          mirror: https://mirrors.mit.edu/ubuntu-ports
-          components: main restricted universe multiverse
-        - builder: ubuntu-24.04
-          architecture: amd64
-          platform: debian
-          suite: bookworm
-          mirror: http://deb.debian.org/debian
-          components: main contrib non-free non-free-firmware
-        - builder: ubuntu-24.04-arm
-          architecture: arm64
-          platform: debian
-          suite: bookworm
-          mirror: http://deb.debian.org/debian
-          components: main contrib non-free non-free-firmware
-    runs-on: ${{ matrix.builder }}
-    name: ${{ matrix.platform }}:${{ matrix.suite }}:${{ matrix.architecture }}
+        include: ${{ fromJson(needs.matrix.outputs.targets) }}
+    runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.target }}
+    env:
+      DEBIAN_MIRROR: https://deb.debian.org/debian
+      UBUNTU_MIRROR: https://mirror.pilotfiber.com/ubuntu
+      UBUNTU_PORTS_MIRROR: https://mirrors.mit.edu/ubuntu-ports
     steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        persist-credentials: false
+    - uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
+      with:
+        aqua_version: v2.43.1
+        aqua_opts: -a
     - run: echo "force-unsafe-io" | sudo tee /etc/dpkg/dpkg.cfg.d/apt-speed-up
     - run: echo "path-exclude=/usr/share/doc/*" | sudo tee -a /etc/dpkg/dpkg.cfg.d/apt-speed-up
     - run: echo "path-exclude=/usr/share/locale/*" | sudo tee -a /etc/dpkg/dpkg.cfg.d/apt-speed-up
     - run: echo "path-exclude=/usr/share/man/*" | sudo tee -a /etc/dpkg/dpkg.cfg.d/apt-speed-up
-    - run: sudo sed -i -E 's@http://azure.archive.ubuntu.com/ubuntu@https://mirror.pilotfiber.com/ubuntu@' /etc/apt/sources.list.d/ubuntu.sources
-    - run: sudo sed -i -E 's@http://ports.ubuntu.com/ubuntu-ports@https://mirrors.mit.edu/ubuntu-ports@' /etc/apt/sources.list.d/ubuntu.sources
+    - run: sudo sed -i -E "s@http://azure.archive.ubuntu.com/ubuntu@${UBUNTU_MIRROR}@" /etc/apt/sources.list.d/ubuntu.sources
+    - run: sudo sed -i -E "s@http://ports.ubuntu.com/ubuntu-ports@${UBUNTU_PORTS_MIRROR}@" /etc/apt/sources.list.d/ubuntu.sources
     - run: cat /etc/apt/sources.list.d/ubuntu.sources
     - run: sudo mount -t tmpfs tmpfs /var/lib/apt/lists
     - run: sudo apt-get update
@@ -62,17 +74,11 @@ jobs:
         sudo apt-get install -y --no-install-recommends
         mmdebstrap debian-archive-keyring
     - run: sudo mount -t tmpfs tmpfs /tmp
-    - run: task
-      env:
-        MIRROR: '${{ matrix.mirror }}'
-        ARCHITECTURE: '${{ matrix.architecture }}'
-        PLATFORM: '${{ matrix.platform }}'
-        SUITE: '${{ matrix.suite }}'
-        COMPONENTS: '${{ matrix.components }}'
-    - uses: actions/attest-build-provenance@v2
+    - run: task ${{ matrix.target }}
+    - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
       with:
         subject-path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}
         path: ${{ matrix.platform }}-${{ matrix.suite }}-${{ matrix.architecture }}-rootfs.tar.zst

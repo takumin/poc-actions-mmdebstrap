@@ -5,20 +5,33 @@
 version: '3'
 
 vars:
-  DEBIAN_COMPONENTS: main,contrib,non-free,non-free-firmware
-  UBUNTU_COMPONENTS: main,restricted,universe,multiverse
-
-  DEBIAN_MIRROR: http://deb.debian.org/debian
-  DEBIAN_SECURITY_MIRROR: http://security.debian.org/debian-security
-  UBUNTU_MIRROR: http://archive.ubuntu.com/ubuntu
-  UBUNTU_PORTS_MIRROR: http://ports.ubuntu.com/ubuntu-ports
+  MATRIX:
+  - {target: 'debian:bookworm:server:amd64', runner: 'ubuntu-24.04'}
+  - {target: 'debian:bookworm:server:arm64', runner: 'ubuntu-24.04-arm'}
+  - {target: 'ubuntu:noble:server:amd64', runner: 'ubuntu-24.04'}
+  - {target: 'ubuntu:noble:server:arm64', runner: 'ubuntu-24.04-arm',}
 
 tasks:
   default:
     silent: true
-    desc: show github actions build matrix
+    desc: default target
     cmds:
-    - task: matrix
+    - task: format
+    - task: lint
+    - task matrix | jq
+
+  format:
+    desc: format files
+    cmds:
+    - yamlfmt .
+    - pinact run
+
+  lint:
+    desc: lint files
+    cmds:
+    - actionlint
+    - ghalint run
+    - ghalint act
 
   debian:bookworm:server:amd64:
     silent: true
@@ -30,8 +43,8 @@ tasks:
         SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
         PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
         ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
-        COMPONENTS: '{{.DEBIAN_COMPONENTS}}'
-        MIRROR: '{{env "DEBIAN_MIRROR" | default .DEBIAN_MIRROR}}'
+        COMPONENTS: main,contrib,non-free,non-free-firmware
+        MIRROR: '{{env "DEBIAN_MIRROR" | default "http://deb.debian.org/debian"}}'
 
   debian:bookworm:server:arm64:
     silent: true
@@ -43,8 +56,8 @@ tasks:
         SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
         PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
         ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
-        COMPONENTS: '{{.DEBIAN_COMPONENTS}}'
-        MIRROR: '{{env "DEBIAN_MIRROR" | default .DEBIAN_MIRROR}}'
+        COMPONENTS: main,contrib,non-free,non-free-firmware
+        MIRROR: '{{env "DEBIAN_MIRROR" | default "http://deb.debian.org/debian"}}'
 
   ubuntu:noble:server:amd64:
     silent: true
@@ -56,8 +69,8 @@ tasks:
         SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
         PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
         ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
-        COMPONENTS: '{{.UBUNTU_COMPONENTS}}'
-        MIRROR: '{{env "UBUNTU_MIRROR" | default .UBUNTU_MIRROR}}'
+        COMPONENTS: main,restricted,universe,multiverse
+        MIRROR: '{{env "UBUNTU_MIRROR" | default "http://archive.ubuntu.com/ubuntu"}}'
 
   ubuntu:noble:server:arm64:
     silent: true
@@ -69,14 +82,13 @@ tasks:
         SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
         PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
         ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
-        COMPONENTS: '{{.UBUNTU_COMPONENTS}}'
-        MIRROR: '{{env "UBUNTU_PORTS_MIRROR" | default .UBUNTU_PORTS_MIRROR}}'
+        COMPONENTS: main,restricted,universe,multiverse
+        MIRROR: '{{env "UBUNTU_PORTS_MIRROR" | default "http://ports.ubuntu.com/ubuntu-ports"}}'
 
   matrix:
     silent: true
-    internal: true
     cmds:
-    - task -l -s | grep -v default | jq -R '.' | jq -cM --slurp
+    - echo '{{toJson .MATRIX}}' | jq '.' | jq -cM --slurp
 
   build:
     internal: true
