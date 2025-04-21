@@ -44,10 +44,7 @@ tasks:
     cmds:
     - task: build
       vars:
-        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
-        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
-        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
-        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        TARGET: '{{.TASK}}'
         COMPONENTS: main,contrib,non-free,non-free-firmware
         MIRROR: '{{env "DEBIAN_MIRROR" | default "http://deb.debian.org/debian"}}'
 
@@ -57,10 +54,7 @@ tasks:
     cmds:
     - task: build
       vars:
-        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
-        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
-        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
-        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        TARGET: '{{.TASK}}'
         COMPONENTS: main,contrib,non-free,non-free-firmware
         MIRROR: '{{env "DEBIAN_MIRROR" | default "http://deb.debian.org/debian"}}'
 
@@ -70,10 +64,7 @@ tasks:
     cmds:
     - task: build
       vars:
-        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
-        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
-        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
-        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        TARGET: '{{.TASK}}'
         COMPONENTS: main,restricted,universe,multiverse
         MIRROR: '{{env "UBUNTU_MIRROR" | default "http://archive.ubuntu.com/ubuntu"}}'
 
@@ -83,20 +74,17 @@ tasks:
     cmds:
     - task: build
       vars:
-        PLATFORM: '{{with $a := split ":" .TASK}}{{$a._0}}{{end}}'
-        SUITE: '{{with $a := split ":" .TASK}}{{$a._1}}{{end}}'
-        PROFILE: '{{with $a := split ":" .TASK}}{{$a._2}}{{end}}'
-        ARCHITECTURE: '{{with $a := split ":" .TASK}}{{$a._3}}{{end}}'
+        TARGET: '{{.TASK}}'
         COMPONENTS: main,restricted,universe,multiverse
         MIRROR: '{{env "UBUNTU_PORTS_MIRROR" | default "http://ports.ubuntu.com/ubuntu-ports"}}'
 
   build:
     internal: true
     vars:
-      PLATFORM: '{{env "PLATFORM" | default .PLATFORM}}'
-      SUITE: '{{env "SUITE" | default .SUITE}}'
-      PROFILE: '{{env "PROFILE" | default .PROFILE}}'
-      ARCHITECTURE: '{{env "ARCHITECTURE" | default .ARCHITECTURE}}'
+      PLATFORM: '{{with $a := split ":" .TARGET}}{{env "PLATFORM" | default $a._0}}{{end}}'
+      SUITE: '{{with $a := split ":" .TARGET}}{{env "SUITE" | default $a._1}}{{end}}'
+      PROFILE: '{{with $a := split ":" .TARGET}}{{env "PROFILE" | default $a._2}}{{end}}'
+      ARCHITECTURE: '{{with $a := split ":" .TARGET}}{{env "ARCHITECTURE" | default $a._3}}{{end}}'
       COMPONENTS: '{{env "COMPONENTS" | default .COMPONENTS}}'
       MIRROR: '{{env "MIRROR" | default .MIRROR}}'
     preconditions:
